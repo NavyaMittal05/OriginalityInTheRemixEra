@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Originality in the Remix Era</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0b;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --accent: #c84b31;
+  --gold: #b8973a;
+  --slate: #2e3a47;
+  --muted: #7a7060;
+  --rule: #d0c8b8;
+  --nav-h: 58px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; -webkit-text-size-adjust: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; line-height: 1.6; }
+img { max-width: 100%; display: block; }
+
+/* SCROLL PROGRESS */
+#progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); z-index: 10000; width: 0%; pointer-events: none; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 900; height: var(--nav-h); background: rgba(245,240,232,0.95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; gap: 1rem; }
+.nav-logo { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--ink); text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+.nav-logo span { color: var(--accent); }
+.nav-links { display: flex; list-style: none; overflow-x: auto; scrollbar-width: none; flex: 1; justify-content: flex-end; }
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a { display: block; padding: 0 0.6rem; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); text-decoration: none; line-height: var(--nav-h); transition: color 0.2s; white-space: nowrap; }
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+.hamburger { display: none; flex-direction: column; justify-content: center; gap: 5px; cursor: pointer; padding: 6px; flex-shrink: 0; background: none; border: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 1px; transition: all 0.3s; }
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* MOBILE DRAWER */
+.mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; background: rgba(245,240,232,0.98); border-bottom: 1px solid var(--rule); z-index: 899; padding: 1rem 1.5rem 1.5rem; max-height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.mobile-menu.open { display: block; }
+.mobile-menu a { display: block; padding: 0.7rem 0; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule); transition: color 0.2s; }
+.mobile-menu a:last-child { border-bottom: none; }
+.mobile-menu a:hover { color: var(--accent); }
+
+/* HERO */
+#home { min-height: 100vh; padding-top: var(--nav-h); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 60% 50% at 75% 25%, rgba(184,151,58,0.13) 0%, transparent 60%), radial-gradient(ellipse 50% 55% at 20% 75%, rgba(200,75,49,0.09) 0%, transparent 55%); }
+.hero-grid-bg { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.3; }
+.hero-inner { flex: 1; position: relative; z-index: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 4rem 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; }
+.hero-kicker { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+.hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.4rem, 7vw, 6rem); font-weight: 900; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); opacity: 0; animation: fadeUp 0.9s 0.4s forwards; }
+.hero-title em { color: var(--accent); font-style: italic; }
+.hero-divider { width: 50px; height: 3px; margin: 1.5rem 0; background: linear-gradient(90deg, var(--accent), var(--gold)); opacity: 0; animation: fadeUp 0.9s 0.55s forwards; }
+.hero-sub { font-size: clamp(0.95rem, 2vw, 1.1rem); font-weight: 300; color: var(--muted); max-width: 560px; line-height: 1.7; opacity: 0; animation: fadeUp 0.9s 0.6s forwards; }
+.hero-body { margin-top: 1rem; font-size: 0.92rem; color: var(--muted); line-height: 1.85; max-width: 660px; opacity: 0; animation: fadeUp 0.9s 0.75s forwards; }
+.hero-question { background: var(--cream); border-left: 4px solid var(--accent); padding: 1.2rem 1.5rem; margin-top: 2rem; max-width: 660px; opacity: 0; animation: fadeUp 0.9s 0.9s forwards; }
+.hero-question .q-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.4rem; }
+.hero-question p { font-family: 'Playfair Display', serif; font-size: 1rem; font-style: italic; line-height: 1.6; color: var(--slate); }
+.hero-cta { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 2rem; opacity: 0; animation: fadeUp 0.9s 1.0s forwards; }
+.btn { display: inline-block; padding: 0.7rem 1.6rem; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: all 0.25s; border: 1px solid transparent; cursor: pointer; font-family: inherit; }
+.btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+.btn-outline { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.hero-foot { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; max-width: 1100px; width: 100%; margin: 0 auto; padding: 1rem 1.5rem; border-top: 1px solid var(--rule); font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.scroll-cue { animation: bounce 2s infinite; }
+
+/* CONTENTS */
+#contents { background: var(--ink); color: var(--paper); }
+#contents .section-label { color: var(--gold); }
+#contents .section-title { color: var(--paper); }
+#contents .section-rule { background: linear-gradient(90deg, var(--gold), var(--accent)); }
+.contents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0; margin-top: 2.5rem; border: 1px solid rgba(255,255,255,0.08); }
+.contents-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1.3rem 1.4rem; border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); text-decoration: none; color: inherit; transition: background 0.2s; position: relative; overflow: hidden; }
+.contents-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gold); transform: scaleY(0); transform-origin: bottom; transition: transform 0.3s; }
+.contents-item:hover { background: rgba(255,255,255,0.04); }
+.contents-item:hover::before { transform: scaleY(1); }
+.contents-num { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--accent); flex-shrink: 0; padding-top: 0.15rem; }
+.contents-label { font-family: 'Playfair Display', serif; font-size: 0.9rem; font-weight: 700; color: var(--paper); line-height: 1.3; }
+.contents-desc { font-size: 0.72rem; color: rgba(245,240,232,0.4); margin-top: 0.2rem; line-height: 1.4; }
+
+/* SECTIONS */
+section { padding: 5rem 0; }
+section:nth-child(even):not(#home):not(#contents):not(#conclusion) { background: var(--cream); }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+.section-header { margin-bottom: 3rem; }
+.section-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.7rem; }
+.section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; color: var(--ink); }
+.section-rule { width: 36px; height: 2px; margin-top: 1rem; background: linear-gradient(90deg, var(--accent), var(--gold)); }
+
+/* ABOUT */
+.about-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 4rem; align-items: start; }
+.about-text p { font-size: 0.95rem; line-height: 1.9; color: var(--slate); margin-bottom: 1.1rem; }
+.stat-block { border-top: 1px solid var(--rule); padding: 1.3rem 0; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 900; color: var(--accent); line-height: 1; }
+.stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+/* CONCEPTS */
+.concepts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5px; background: var(--rule); }
+.concept-card { background: var(--paper); padding: 1.8rem; transition: background 0.2s; position: relative; overflow: hidden; }
+section:nth-child(even) .concept-card { background: var(--cream); }
+.concept-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); transform: scaleX(0); transform-origin: left; transition: transform 0.35s; }
+.concept-card:hover::before { transform: scaleX(1); }
+.concept-card:hover { background: #fff; }
+.concept-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.8rem; display: block; }
+.concept-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.7rem; color: var(--ink); }
+.concept-text { font-size: 0.87rem; color: var(--muted); line-height: 1.75; }
+
+/* INDIA */
+.india-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.india-main p { font-size: 0.95rem; line-height: 1.9; color: var(--slate); margin-bottom: 1rem; }
+.india-main strong { color: var(--ink); }
+.section-cards { display: flex; flex-direction: column; gap: 1rem; }
+.section-card { border-left: 3px solid var(--gold); padding: 1rem 1.2rem; background: rgba(184,151,58,0.07); }
+.section-card-title { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+.section-card-body { font-size: 0.86rem; color: var(--slate); line-height: 1.7; }
+.india-highlight { background: var(--ink); color: var(--paper); padding: 1.4rem 1.6rem; margin-top: 1.5rem; border-left: 4px solid var(--accent); }
+.india-highlight p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.97rem; line-height: 1.6; color: rgba(245,240,232,0.85); }
+
+/* CASE STUDIES */
+.cases-tabs-nav { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--rule); }
+.cases-tab-btn { padding: 0.7rem 1.2rem; font-family: 'DM Sans', sans-serif; font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; background: none; border: none; color: var(--muted); border-right: 1px solid var(--rule); border-bottom: 3px solid transparent; transition: all 0.2s; }
+.cases-tab-btn:last-child { border-right: none; }
+.cases-tab-btn.active { background: var(--ink); color: var(--paper); border-bottom-color: var(--accent); }
+.cases-tab-btn:hover:not(.active) { background: var(--cream); color: var(--ink); }
+.cases-panels { border: 1px solid var(--rule); border-top: none; }
+.cases-panel { display: none; }
+.cases-panel.active { display: block; }
+.cases-list-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 400px; }
+.cases-list { border-right: 1px solid var(--rule); overflow-y: auto; max-height: 480px; }
+.case-item { padding: 1rem 1.2rem; cursor: pointer; border-left: 3px solid transparent; border-bottom: 1px solid var(--rule); transition: all 0.2s; }
+.case-item:last-child { border-bottom: none; }
+.case-item.active { border-left-color: var(--accent); background: var(--cream); }
+.case-item:hover:not(.active) { background: rgba(0,0,0,0.03); }
+.case-item-title { font-family: 'Playfair Display', serif; font-size: 0.83rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.case-item-year { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--accent); margin-top: 0.2rem; display: block; }
+.case-detail { padding: 2rem; }
+.case-detail-inner { display: none; animation: fadeIn 0.25s; }
+.case-detail-inner.active { display: block; }
+.case-detail-num { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.8rem; }
+.case-detail-title { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 3vw, 1.7rem); font-weight: 800; color: var(--ink); line-height: 1.2; margin-bottom: 1.2rem; }
+.case-detail-body { font-size: 0.92rem; line-height: 1.85; color: var(--slate); }
+.case-detail-body p + p { margin-top: 0.8rem; }
+.case-tag { display: inline-block; padding: 0.25rem 0.65rem; background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1.2rem; margin-right: 0.4rem; }
+
+/* MOBILE CASES */
+.cases-mobile { display: none; }
+.mob-cat-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin: 1.5rem 0 0.5rem; }
+.mob-cat-label:first-child { margin-top: 0; }
+.cases-acc-item { border-bottom: 1px solid var(--rule); }
+.cases-acc-btn { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; padding: 1rem 0; cursor: pointer; background: none; border: none; text-align: left; gap: 0.8rem; }
+.cases-acc-title { font-family: 'Playfair Display', serif; font-size: 0.93rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.cases-acc-icon { flex-shrink: 0; font-size: 1.2rem; color: var(--accent); line-height: 1; transition: transform 0.3s; }
+.cases-acc-item.open .cases-acc-icon { transform: rotate(45deg); }
+.cases-acc-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.cases-acc-item.open .cases-acc-body { max-height: 500px; }
+.cases-acc-inner { padding-bottom: 1.2rem; }
+.cases-acc-inner p { font-size: 0.88rem; line-height: 1.8; color: var(--slate); }
+.cases-acc-inner p + p { margin-top: 0.7rem; }
+
+/* COMPARATIVE */
+.comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; }
+.comp-card { border: 1px solid var(--rule); padding: 1.8rem; position: relative; }
+.comp-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); }
+.comp-flag { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+.comp-country { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.6rem; }
+.comp-heading { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 0.7rem; color: var(--ink); }
+.comp-body { font-size: 0.86rem; color: var(--muted); line-height: 1.75; }
+.comp-verdict { margin-top: 1rem; font-size: 0.76rem; font-weight: 500; color: var(--slate); padding: 0.4rem 0.7rem; background: rgba(184,151,58,0.1); border-left: 2px solid var(--gold); }
+
+/* CONTEMPORARY */
+.issues-accordion { border-top: 1px solid var(--rule); }
+.issue-item { border-bottom: 1px solid var(--rule); }
+.issue-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.4rem 0; cursor: pointer; background: none; border: none; text-align: left; gap: 1rem; }
+.issue-title { font-family: 'Playfair Display', serif; font-size: clamp(0.95rem, 2vw, 1.15rem); font-weight: 700; color: var(--ink); }
+.issue-icon { width: 28px; height: 28px; border: 1px solid var(--rule); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--accent); transition: transform 0.3s; }
+.issue-item.open .issue-icon { transform: rotate(45deg); }
+.issue-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.issue-item.open .issue-body { max-height: 400px; }
+.issue-body-inner { padding-bottom: 1.5rem; }
+.issue-body-inner p { font-size: 0.92rem; line-height: 1.85; color: var(--slate); max-width: 720px; }
+.issue-body-inner p + p { margin-top: 0.8rem; }
+
+/* ANALYSIS */
+.analysis-pull { font-family: 'Playfair Display', serif; font-size: clamp(1.1rem, 2.5vw, 1.8rem); font-style: italic; line-height: 1.45; color: var(--slate); border-left: 5px solid var(--gold); padding-left: 1.8rem; margin: 2.5rem 0; }
+.analysis-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 1.5rem; }
+.analysis-cols p { font-size: 0.92rem; line-height: 1.85; color: var(--slate); margin-bottom: 1rem; }
+
+/* GUIDE */
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; }
+.guide-card { padding: 1.8rem; border: 1px solid var(--rule); }
+.guide-card:nth-child(1) { border-top: 3px solid #4caf50; }
+.guide-card:nth-child(2) { border-top: 3px solid var(--accent); }
+.guide-card:nth-child(3) { border-top: 3px solid var(--gold); }
+.guide-card:nth-child(4) { border-top: 3px solid var(--slate); }
+.guide-icon { font-size: 1.8rem; margin-bottom: 0.8rem; display: block; }
+.guide-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+.guide-body { font-size: 0.86rem; color: var(--muted); line-height: 1.75; }
+
+/* CONCLUSION */
+#conclusion { background: var(--ink); color: var(--paper); }
+#conclusion .section-label { color: var(--gold); }
+#conclusion .section-title { color: var(--paper); }
+#conclusion .section-rule { background: linear-gradient(90deg, var(--gold), var(--accent)); }
+.concl-text { font-size: 1rem; line-height: 1.9; color: rgba(245,240,232,0.7); max-width: 700px; margin-top: 1.5rem; }
+.concl-pull { font-family: 'Playfair Display', serif; font-size: clamp(1.05rem, 2.5vw, 1.6rem); font-style: italic; line-height: 1.45; color: var(--gold); border-left: 4px solid var(--accent); padding-left: 1.8rem; margin: 2.5rem 0; }
+
+/* REFERENCES */
+.refs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2.5rem; }
+.refs-group-title { font-family: 'DM Mono', monospace; font-size: 0.63rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--rule); padding-bottom: 0.7rem; margin-bottom: 1rem; }
+.refs-group-title + .refs-group-title { margin-top: 1.5rem; }
+.refs-list { list-style: none; }
+.refs-list li { font-size: 0.83rem; color: var(--slate); line-height: 1.6; padding: 0.4rem 0; border-bottom: 1px solid var(--rule); }
+.refs-list li:last-child { border-bottom: none; }
+.refs-list em { color: var(--muted); font-style: normal; font-family: 'DM Mono', monospace; font-size: 0.7rem; }
+
+/* FOOTER */
+footer { background: var(--ink); color: rgba(245,240,232,0.4); text-align: center; padding: 1.5rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; border-top: 1px solid rgba(255,255,255,0.06); }
+footer span { color: var(--gold); }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+/* TABLET */
+@media (max-width: 900px) {
+  .nav-links { display: none !important; }
+  .hamburger { display: flex; }
+  .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .india-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .analysis-cols { grid-template-columns: 1fr; gap: 0; }
+  .cases-list-layout { display: none; }
+  .cases-tabs-nav { display: none; }
+  .cases-mobile { display: block; }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  section { padding: 3.5rem 0; }
+  .hero-inner { padding: 3rem 1rem 1.5rem; }
+  .container { padding: 0 1rem; }
+  .hero-foot { padding: 0.8rem 1rem; font-size: 0.55rem; }
+  .hero-foot span:first-child, .hero-foot span:last-child { display: none; }
+  .concepts-grid { grid-template-columns: 1fr; }
+  .comp-grid { grid-template-columns: 1fr; }
+  .guide-grid { grid-template-columns: 1fr; }
+  .refs-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .contents-grid { grid-template-columns: 1fr 1fr; }
+  .case-detail { padding: 1.2rem; }
+}
+@media (max-width: 360px) {
+  .contents-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav id="navbar">
+  <a href="#home" class="nav-logo">Originality<span> ×</span> Remix</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#contents">Contents</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#concepts">Concepts</a></li>
+    <li><a href="#india">India</a></li>
+    <li><a href="#cases">Cases</a></li>
+    <li><a href="#comparative">Comparative</a></li>
+    <li><a href="#contemporary">Contemporary</a></li>
+    <li><a href="#analysis">Analysis</a></li>
+    <li><a href="#guide">Guide</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+    <li><a href="#references">References</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" onclick="closeMenu()">Home</a>
+  <a href="#contents" onclick="closeMenu()">Contents</a>
+  <a href="#about" onclick="closeMenu()">About</a>
+  <a href="#concepts" onclick="closeMenu()">Key Concepts</a>
+  <a href="#india" onclick="closeMenu()">Indian Copyright Framework</a>
+  <a href="#cases" onclick="closeMenu()">Case Studies</a>
+  <a href="#comparative" onclick="closeMenu()">Comparative Perspective</a>
+  <a href="#contemporary" onclick="closeMenu()">Contemporary Issues</a>
+  <a href="#analysis" onclick="closeMenu()">Analysis</a>
+  <a href="#guide" onclick="closeMenu()">Creator Guide</a>
+  <a href="#conclusion" onclick="closeMenu()">Conclusion</a>
+  <a href="#references" onclick="closeMenu()">References</a>
+</div>
+
+<!-- HOME -->
+<section id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <span class="hero-kicker">Academic Research Platform · Intellectual Property Law</span>
+    <h1 class="hero-title">Originality<br>in the <em>Remix</em><br>Era</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-sub">Reimagining Copyright at the Intersection of Creativity, Transformation, and Law</p>
+    <p class="hero-body">In the contemporary digital landscape, creativity increasingly emerges through reinterpretation, remixing, and transformation of pre-existing works. Digital platforms and participatory culture have reshaped how art is produced, consumed, and circulated — creativity no longer exists as isolated authorship but as part of a shared and constantly evolving cultural ecosystem.</p>
+    <div class="hero-question">
+      <span class="q-label">Central Question</span>
+      <p>When does creative borrowing become infringement, and when does it constitute legitimate transformation?</p>
+    </div>
+    <div class="hero-cta">
+      <a href="#contents" class="btn btn-primary">View Contents</a>
+      <a href="#cases" class="btn btn-outline">Explore Cases</a>
+    </div>
+  </div>
+  <div class="hero-foot">
+    <span>Copyright · IP Law · Remix Culture</span>
+    <span class="scroll-cue">Scroll to explore ↓</span>
+    <span>2024 Research</span>
+  </div>
+</section>
+
+<!-- CONTENTS -->
+<section id="contents">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">Navigation</span>
+      <h2 class="section-title">Table of Contents</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="contents-grid reveal">
+      <a href="#about" class="contents-item"><span class="contents-num">01</span><div><div class="contents-label">About</div><div class="contents-desc">Project overview &amp; objectives</div></div></a>
+      <a href="#concepts" class="contents-item"><span class="contents-num">02</span><div><div class="contents-label">Key Concepts</div><div class="contents-desc">Legal doctrines &amp; definitions</div></div></a>
+      <a href="#india" class="contents-item"><span class="contents-num">03</span><div><div class="contents-label">Indian Copyright Framework</div><div class="contents-desc">Copyright Act, 1957</div></div></a>
+      <a href="#cases" class="contents-item"><span class="contents-num">04</span><div><div class="contents-label">Case Studies</div><div class="contents-desc">Indian &amp; international cases</div></div></a>
+      <a href="#comparative" class="contents-item"><span class="contents-num">05</span><div><div class="contents-label">Comparative Perspective</div><div class="contents-desc">US, India, UK &amp; EU</div></div></a>
+      <a href="#contemporary" class="contents-item"><span class="contents-num">06</span><div><div class="contents-label">Contemporary Issues</div><div class="contents-desc">AI, deepfakes &amp; platforms</div></div></a>
+      <a href="#analysis" class="contents-item"><span class="contents-num">07</span><div><div class="contents-label">Analysis</div><div class="contents-desc">Critical legal evaluation</div></div></a>
+      <a href="#guide" class="contents-item"><span class="contents-num">08</span><div><div class="contents-label">Creator Guide</div><div class="contents-desc">Practical guidance</div></div></a>
+      <a href="#conclusion" class="contents-item"><span class="contents-num">09</span><div><div class="contents-label">Conclusion</div><div class="contents-desc">The road ahead</div></div></a>
+      <a href="#references" class="contents-item"><span class="contents-num">10</span><div><div class="contents-label">References</div><div class="contents-desc">Statutes, cases &amp; literature</div></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">01 — About</span>
+      <h2 class="section-title">About This Project</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>This project undertakes a critical examination of copyright law in the context of contemporary remix culture. Traditional copyright frameworks are based on the protection of original expression and grant exclusive rights to creators as an incentive for innovation and economic reward. However, modern artistic practices increasingly rely on adaptation, recombination, and transformation of existing material.</p>
+        <p>The project analyses core legal doctrines such as originality, fair dealing, and the idea–expression dichotomy, while situating them within real-world creative practices. It further evaluates how effectively these doctrines respond to technological developments including digital reproduction, artificial intelligence, and global content circulation.</p>
+        <p>By combining doctrinal analysis, case law, and industry examples, the project assesses whether copyright law successfully balances the protection of creators with the promotion of cultural and technological progress.</p>
+      </div>
+      <div class="reveal">
+        <div class="stat-block"><div class="stat-num">10</div><div class="stat-label">Landmark Cases Analysed</div></div>
+        <div class="stat-block"><div class="stat-num">4</div><div class="stat-label">Jurisdictions Compared</div></div>
+        <div class="stat-block"><div class="stat-num">6</div><div class="stat-label">Contemporary Issues</div></div>
+        <div class="stat-block"><div class="stat-num">7</div><div class="stat-label">Core Legal Concepts</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEY CONCEPTS -->
+<section id="concepts">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">02 — Key Concepts</span>
+      <h2 class="section-title">Legal Framework &amp; Doctrine</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="concepts-grid reveal">
+      <div class="concept-card"><span class="concept-num">01</span><div class="concept-title">Originality</div><p class="concept-text">Copyright protection requires originality, traditionally understood as the application of skill, labour, and judgment. In a digital environment where creativity often builds upon existing works, originality increasingly involves transformation rather than independent creation.</p></div>
+      <div class="concept-card"><span class="concept-num">02</span><div class="concept-title">Idea–Expression Dichotomy</div><p class="concept-text">Copyright protects the expression of ideas but not the ideas themselves. While this distinction appears clear in theory, it is often difficult to apply in practice, especially in creative works where themes, structures, and stylistic elements overlap.</p></div>
+      <div class="concept-card"><span class="concept-num">03</span><div class="concept-title">Substantial Similarity</div><p class="concept-text">Infringement is determined by whether a substantial part of a work has been copied. Courts assess both qualitative and quantitative similarity, often relying on the perception of an ordinary observer rather than purely technical analysis.</p></div>
+      <div class="concept-card"><span class="concept-num">04</span><div class="concept-title">Derivative Works</div><p class="concept-text">Derivative works are based on pre-existing material and involve adaptation or modification. The legal challenge lies in distinguishing legitimate transformation from unauthorized reproduction.</p></div>
+      <div class="concept-card"><span class="concept-num">05</span><div class="concept-title">Fair Use (United States)</div><p class="concept-text">Fair use is a flexible doctrine that allows unauthorized use based on a four-factor test, with particular emphasis on whether the use is transformative and whether it harms the market for the original work.</p></div>
+      <div class="concept-card"><span class="concept-num">06</span><div class="concept-title">Fair Dealing (India &amp; UK)</div><p class="concept-text">Fair dealing permits use only for specific statutory purposes such as research, criticism, review, and reporting of current events. It offers limited flexibility and restricts judicial discretion compared to the American approach.</p></div>
+      <div class="concept-card"><span class="concept-num">07</span><div class="concept-title">Transformative Use</div><p class="concept-text">Transformative use evaluates whether a work adds new meaning, expression, or purpose. While central to US copyright law, this doctrine is not formally recognised in Indian law, creating a significant doctrinal gap.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- INDIAN FRAMEWORK -->
+<section id="india">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">03 — Indian Copyright Framework</span>
+      <h2 class="section-title">Copyright Act, 1957</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="india-grid">
+      <div class="india-main reveal">
+        <p>Under the Copyright Act, 1957, copyright law in India provides a structured system of protection for creators. The Act establishes a comprehensive framework governing creation, ownership, and enforcement of copyright in literary, artistic, musical, and cinematographic works.</p>
+        <p>A defining feature of Indian copyright law is its reliance on <strong>fair dealing</strong> rather than fair use. Unlike the flexible American approach, Indian law restricts permissible use to specific categories, significantly limiting the scope for creative reinterpretation.</p>
+        <p>Indian courts have consistently held that <strong>commercial intent negates claims of fair dealing</strong>. Unauthorized use of copyrighted material for profit is almost always treated as infringement. This has significant implications for music sampling and remix culture.</p>
+        <p>In practice, creators must obtain licences from both the owner of the composition and the owner of the sound recording. The absence of a recognised transformative use doctrine and the lack of a clear <em>de minimis</em> exception make the legal environment particularly restrictive.</p>
+        <div class="india-highlight">
+          <p>"The Indian framework prioritises certainty and rights-holder protection over creative flexibility — a tension that grows sharper with each technological development."</p>
+        </div>
+      </div>
+      <div class="section-cards reveal">
+        <div class="section-card">
+          <div class="section-card-title">Section 14 — Exclusive Rights</div>
+          <div class="section-card-body">Defines the exclusive rights of copyright holders, including reproduction, distribution, public performance, and adaptation of the protected work.</div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Section 52 — Fair Dealing Exceptions</div>
+          <div class="section-card-body">Sets out fair dealing exceptions for purposes such as research, criticism, review, and reporting of current events. Closed list — no judicial expansion permitted.</div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Section 57 — Moral Rights</div>
+          <div class="section-card-body">Protects the moral rights of authors, ensuring that their work is not distorted or modified in a manner that harms their reputation, independently of economic rights.</div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Duration of Protection</div>
+          <div class="section-card-body">Copyright protection extends to the life of the author plus sixty years, aligning with the Berne Convention's minimum standard.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">04 — Case Studies</span>
+      <h2 class="section-title">Landmark Legal Decisions</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="casesDesktop" class="reveal">
+      <div class="cases-tabs-nav">
+        <button class="cases-tab-btn active" onclick="switchTab('indian',this)">Indian Cases</button>
+        <button class="cases-tab-btn" onclick="switchTab('bollywood',this)">Bollywood &amp; Music</button>
+        <button class="cases-tab-btn" onclick="switchTab('intl',this)">International Cases</button>
+      </div>
+      <div class="cases-panels">
+
+        <!-- INDIAN -->
+        <div class="cases-panel active" id="tab-indian">
+          <div class="cases-list-layout">
+            <div class="cases-list" id="indianList">
+              <div class="case-item active" data-target="i0"><div class="case-item-title">R.G. Anand v. Deluxe Films</div><span class="case-item-year">1978 — Supreme Court of India</span></div>
+              <div class="case-item" data-target="i1"><div class="case-item-title">Gramophone Co. v. Super Cassette Industries</div><span class="case-item-year">2010</span></div>
+              <div class="case-item" data-target="i2"><div class="case-item-title">Star India v. Leo Burnett</div><span class="case-item-year">India</span></div>
+              <div class="case-item" data-target="i3"><div class="case-item-title">Civic Chandran v. Ammini Amma</div><span class="case-item-year">Kerala High Court</span></div>
+              <div class="case-item" data-target="i4"><div class="case-item-title">Sholay Copyright Case</div><span class="case-item-year">Delhi High Court</span></div>
+            </div>
+            <div class="case-detail">
+              <div class="case-detail-inner active" id="i0">
+                <span class="case-detail-num">Indian Case 01 / 05</span>
+                <div class="case-detail-title">R.G. Anand v. Deluxe Films (1978)</div>
+                <div class="case-detail-body">
+                  <p>This landmark Supreme Court decision established the <strong>idea–expression dichotomy</strong> as a foundational principle of Indian copyright law. The Court held that copyright does not subsist in ideas, themes, or plots, but only in their expression.</p>
+                  <p>The Court introduced the <em>ordinary observer test</em>, asking whether an average viewer would perceive the later work as a copy of the original. Applying this test, the Court found no infringement, as the similarities were limited to general themes rather than specific expression.</p>
+                </div>
+                <span class="case-tag">Idea–Expression</span><span class="case-tag">Ordinary Observer Test</span>
+              </div>
+              <div class="case-detail-inner" id="i1">
+                <span class="case-detail-num">Indian Case 02 / 05</span>
+                <div class="case-detail-title">Gramophone Company of India v. Super Cassette Industries (2010)</div>
+                <div class="case-detail-body">
+                  <p>The Court adopted a strict approach to copyright protection in the context of music. It held that commercial use of copyrighted material without authorization constitutes infringement, regardless of the extent of modification.</p>
+                  <p>This decision significantly restricted the scope of remixing and sampling in India, reinforcing that commercial intent eliminates any fair dealing protection that might otherwise apply.</p>
+                </div>
+                <span class="case-tag">Music</span><span class="case-tag">Commercial Use</span><span class="case-tag">Fair Dealing</span>
+              </div>
+              <div class="case-detail-inner" id="i2">
+                <span class="case-detail-num">Indian Case 03 / 05</span>
+                <div class="case-detail-title">Star India Pvt. Ltd. v. Leo Burnett (India) Pvt. Ltd.</div>
+                <div class="case-detail-body">
+                  <p>The Court reinforced that even <strong>minor modifications</strong> of a copyrighted work require authorization. The decision emphasized that commercial use cannot be justified under fair dealing, regardless of degree of alteration.</p>
+                  <p>This case further narrowed the permissible scope for creative reuse in commercial contexts and set a high threshold for what constitutes sufficient transformation under Indian law.</p>
+                </div>
+                <span class="case-tag">Minor Modification</span><span class="case-tag">Commercial Use</span>
+              </div>
+              <div class="case-detail-inner" id="i3">
+                <span class="case-detail-num">Indian Case 04 / 05</span>
+                <div class="case-detail-title">Civic Chandran v. Ammini Amma</div>
+                <div class="case-detail-body">
+                  <p>The Kerala High Court recognised that <strong>parody and satire</strong> may fall within the scope of fair dealing under Indian law — a comparatively progressive position within the Indian framework.</p>
+                  <p>However, the Court clarified that only limited portions of a work may be used for such purposes, and that parodic intent must be evident. The decision stops well short of the broad transformative use doctrine developed in the United States.</p>
+                </div>
+                <span class="case-tag">Parody</span><span class="case-tag">Satire</span><span class="case-tag">Fair Dealing</span>
+              </div>
+              <div class="case-detail-inner" id="i4">
+                <span class="case-detail-num">Indian Case 05 / 05</span>
+                <div class="case-detail-title">Sholay Copyright Case</div>
+                <div class="case-detail-body">
+                  <p>The Delhi High Court reinforced the protection of cinematographic works and awarded damages for unauthorized use. The case confirmed that copyright protection continues to apply even to older, iconic works.</p>
+                  <p>The decision serves as a reminder that cultural prominence of a work does not diminish its legal protection, and that unauthorized commercial exploitation carries significant financial consequences.</p>
+                </div>
+                <span class="case-tag">Cinematographic Works</span><span class="case-tag">Damages</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOLLYWOOD -->
+        <div class="cases-panel" id="tab-bollywood">
+          <div class="cases-list-layout">
+            <div class="cases-list" id="bollywoodList">
+              <div class="case-item active" data-target="b0"><div class="case-item-title">Thoda Resham / Addictive</div><span class="case-item-year">Bappi Lahiri · Saregama India</span></div>
+              <div class="case-item" data-target="b1"><div class="case-item-title">Black Eyed Peas / Asha Bhosle</div><span class="case-item-year">Licensing Resolution</span></div>
+              <div class="case-item" data-target="b2"><div class="case-item-title">Chuttamalle (2024)</div><span class="case-item-year">Manike Mage Hithe</span></div>
+            </div>
+            <div class="case-detail">
+              <div class="case-detail-inner active" id="b0">
+                <span class="case-detail-num">Industry Example 01 / 03</span>
+                <div class="case-detail-title">"Thoda Resham Lagta Hai" &amp; "Addictive"</div>
+                <div class="case-detail-body">
+                  <p>The song <em>Thoda Resham Lagta Hai</em>, composed by Bappi Lahiri, was later sampled internationally in <em>Addictive</em> by Truth Hurts. Saregama India initiated legal action against the unauthorized use of the track.</p>
+                  <p>However, the situation revealed a layered complexity, as the original composition had itself drawn from earlier international work. This illustrates the difficulty of applying strict copyright principles in an industry shaped by iterative borrowing.</p>
+                </div>
+                <span class="case-tag">Sampling</span><span class="case-tag">Iterative Borrowing</span>
+              </div>
+              <div class="case-detail-inner" id="b1">
+                <span class="case-detail-num">Industry Example 02 / 03</span>
+                <div class="case-detail-title">Black Eyed Peas &amp; Asha Bhosle</div>
+                <div class="case-detail-body">
+                  <p>The Black Eyed Peas incorporated elements from songs originally sung by Asha Bhosle into their production. The matter was resolved through <strong>licensing</strong>, reflecting the increasing importance of formal permissions in global music production.</p>
+                  <p>This example demonstrates how rights-holder negotiations can resolve disputes that copyright litigation might have prolonged, while highlighting the asymmetry of bargaining power between global and regional creators.</p>
+                </div>
+                <span class="case-tag">Licensing</span><span class="case-tag">Cross-border</span>
+              </div>
+              <div class="case-detail-inner" id="b2">
+                <span class="case-detail-num">Industry Example 03 / 03</span>
+                <div class="case-detail-title">Chuttamalle (2024) &amp; Manike Mage Hithe</div>
+                <div class="case-detail-body">
+                  <p>The 2024 controversy surrounding <em>Chuttamalle</em>, which drew comparisons with the Sri Lankan hit <em>Manike Mage Hithe</em>, illustrates the divergence between public perception, industry practice, and legal enforcement.</p>
+                  <p>Despite noticeable similarities, no legal action followed, and the original composer acknowledged the resemblance positively. This highlights how informal norms often govern creative borrowing in practice, in contrast to formal legal mechanisms.</p>
+                </div>
+                <span class="case-tag">2024</span><span class="case-tag">Industry Norms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERNATIONAL -->
+        <div class="cases-panel" id="tab-intl">
+          <div class="cases-list-layout">
+            <div class="cases-list" id="intlList">
+              <div class="case-item active" data-target="n0"><div class="case-item-title">Campbell v. Acuff-Rose Music</div><span class="case-item-year">510 U.S. 569 (1994)</span></div>
+              <div class="case-item" data-target="n1"><div class="case-item-title">Rogers v. Koons</div><span class="case-item-year">960 F.2d 301 (1992)</span></div>
+              <div class="case-item" data-target="n2"><div class="case-item-title">Cariou v. Prince</div><span class="case-item-year">714 F.3d 694 (2013)</span></div>
+              <div class="case-item" data-target="n3"><div class="case-item-title">Feist Publications v. Rural Tel.</div><span class="case-item-year">499 U.S. 340 (1991)</span></div>
+              <div class="case-item" data-target="n4"><div class="case-item-title">Bridgeport Music v. Dimension Films</div><span class="case-item-year">410 F.3d 792 (2005)</span></div>
+              <div class="case-item" data-target="n5"><div class="case-item-title">Authors Guild v. Google</div><span class="case-item-year">804 F.3d 202 (2015)</span></div>
+              <div class="case-item" data-target="n6"><div class="case-item-title">Andy Warhol Foundation v. Goldsmith</div><span class="case-item-year">598 U.S. (2023)</span></div>
+            </div>
+            <div class="case-detail">
+              <div class="case-detail-inner active" id="n0">
+                <span class="case-detail-num">International Case 01 / 07</span>
+                <div class="case-detail-title">Campbell v. Acuff-Rose Music (1994)</div>
+                <div class="case-detail-body">
+                  <p>A watershed ruling establishing that parody and transformative use are central to the fair use inquiry. The Supreme Court unanimously held that 2 Live Crew's parody of Roy Orbison's "Oh, Pretty Woman" could qualify as fair use.</p>
+                  <p>The Court emphasized that commerciality does not automatically weigh against fair use, and that parody has inherent communicative value as social commentary.</p>
+                </div>
+                <span class="case-tag">Parody</span><span class="case-tag">Transformative Use</span>
+              </div>
+              <div class="case-detail-inner" id="n1">
+                <span class="case-detail-num">International Case 02 / 07</span>
+                <div class="case-detail-title">Rogers v. Koons (1992)</div>
+                <div class="case-detail-body">
+                  <p>Artist Jeff Koons reproduced a photograph by Art Rogers in a sculpture, claiming artistic transformation as a defence. The Second Circuit rejected this, holding that where transformation is minimal, the appropriation constitutes infringement.</p>
+                  <p>The case underscores that artistic intent alone does not constitute a legal defence under fair use.</p>
+                </div>
+                <span class="case-tag">Appropriation Art</span><span class="case-tag">Minimal Transformation</span>
+              </div>
+              <div class="case-detail-inner" id="n2">
+                <span class="case-detail-num">International Case 03 / 07</span>
+                <div class="case-detail-title">Cariou v. Prince (2013)</div>
+                <div class="case-detail-body">
+                  <p>Artist Richard Prince incorporated Cariou's photographs into large-scale paintings. The Second Circuit found that 25 of 30 works constituted fair use, employing a broad conception of transformation focused on visual aesthetics rather than commentary.</p>
+                  <p>Critics argue this introduces excessive judicial subjectivity; supporters see it as necessary flexibility for contemporary art.</p>
+                </div>
+                <span class="case-tag">Transformative Use</span><span class="case-tag">Appropriation Art</span>
+              </div>
+              <div class="case-detail-inner" id="n3">
+                <span class="case-detail-num">International Case 04 / 07</span>
+                <div class="case-detail-title">Feist Publications v. Rural Telephone Service (1991)</div>
+                <div class="case-detail-body">
+                  <p>The Supreme Court held that mere labour ("sweat of the brow") is insufficient to establish copyright protection. Works must contain a minimal degree of creativity in their selection or arrangement.</p>
+                  <p>This ruling established the constitutional requirement for originality under US law and remains foundational to understanding the boundaries between protectable expression and unprotectable facts.</p>
+                </div>
+                <span class="case-tag">Originality</span><span class="case-tag">Creativity Threshold</span>
+              </div>
+              <div class="case-detail-inner" id="n4">
+                <span class="case-detail-num">International Case 05 / 07</span>
+                <div class="case-detail-title">Bridgeport Music v. Dimension Films (2005)</div>
+                <div class="case-detail-body">
+                  <p>The Sixth Circuit adopted an absolute prohibition on digital music sampling without licence: "Get a licence or do not sample." Any unauthorized digital sampling — however minimal — constitutes infringement.</p>
+                  <p>This strict approach has been criticized for impeding musical creativity and driving up licensing costs, standing in contrast to the more flexible fair use analysis available in other creative contexts.</p>
+                </div>
+                <span class="case-tag">Music Sampling</span><span class="case-tag">Strict Liability</span>
+              </div>
+              <div class="case-detail-inner" id="n5">
+                <span class="case-detail-num">International Case 06 / 07</span>
+                <div class="case-detail-title">Authors Guild v. Google (2015)</div>
+                <div class="case-detail-body">
+                  <p>The Second Circuit affirmed that Google's large-scale digitisation of millions of books constituted fair use, recognising the transformative public utility of making works searchable without displaying full texts.</p>
+                  <p>The case demonstrates how systemic societal benefit can be a factor favouring fair use, even in highly commercial contexts.</p>
+                </div>
+                <span class="case-tag">Mass Digitisation</span><span class="case-tag">Public Utility</span>
+              </div>
+              <div class="case-detail-inner" id="n6">
+                <span class="case-detail-num">International Case 07 / 07</span>
+                <div class="case-detail-title">Andy Warhol Foundation v. Goldsmith (2023)</div>
+                <div class="case-detail-body">
+                  <p>The Supreme Court held that Warhol's silkscreen portraits derived from Goldsmith's photograph of Prince were not transformative in the relevant legal sense, given the commercial context and impact on licensing markets.</p>
+                  <p>The decision signals a narrowing of transformative use doctrine and a re-emphasis on market harm, representing a significant recalibration of fair use analysis.</p>
+                </div>
+                <span class="case-tag">Transformative Use</span><span class="case-tag">Commercial Licensing</span><span class="case-tag">2023</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MOBILE ACCORDION -->
+    <div class="cases-mobile reveal">
+      <div class="mob-cat-label">Indian Cases</div>
+      <div class="cases-acc-item open">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">R.G. Anand v. Deluxe Films (1978)</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Established the idea–expression dichotomy. The Supreme Court held copyright protects only expression, not ideas or themes. Introduced the ordinary observer test — no infringement found as similarities were limited to general themes.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Gramophone Co. v. Super Cassette Industries (2010)</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Strict approach to music copyright. Commercial use without authorization constitutes infringement regardless of modification. Significantly restricted remixing and sampling in India.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Star India v. Leo Burnett</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Even minor modifications require authorization. Commercial use cannot be justified under fair dealing regardless of degree of alteration.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Civic Chandran v. Ammini Amma</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Kerala HC recognised parody and satire may fall within fair dealing. Only limited portions may be used and parodic intent must be evident.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Sholay Copyright Case</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Delhi HC reinforced protection of cinematographic works and awarded damages for unauthorized use. Copyright applies even to older, iconic works.</p></div></div>
+      </div>
+      <div class="mob-cat-label">Bollywood &amp; Music Industry</div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">"Thoda Resham" &amp; "Addictive"</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Bappi Lahiri's composition was sampled internationally by Truth Hurts. Saregama filed suit, but the case revealed that the original also drew from earlier international work — illustrating iterative borrowing in Bollywood.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Black Eyed Peas &amp; Asha Bhosle</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>The Black Eyed Peas used elements from Asha Bhosle songs. Resolved through licensing, highlighting the importance of formal permissions in global music.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Chuttamalle (2024) &amp; Manike Mage Hithe</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Despite noticeable similarities, no legal action followed and the original composer acknowledged the resemblance positively. Shows the divergence between public perception and legal enforcement.</p></div></div>
+      </div>
+      <div class="mob-cat-label">International Cases</div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Campbell v. Acuff-Rose (1994)</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Established parody as transformative use. Supreme Court held 2 Live Crew's parody could qualify as fair use even where commercial. Commerciality alone does not defeat the defence.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Bridgeport Music v. Dimension Films (2005)</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>"Get a licence or do not sample." Any unauthorized digital sampling constitutes infringement. Criticized for impeding musical creativity and driving up licensing costs.</p></div></div>
+      </div>
+      <div class="cases-acc-item">
+        <button class="cases-acc-btn" onclick="mAcc(this)"><span class="cases-acc-title">Andy Warhol Foundation v. Goldsmith (2023)</span><span class="cases-acc-icon">+</span></button>
+        <div class="cases-acc-body"><div class="cases-acc-inner"><p>Supreme Court narrowed transformative use doctrine. Warhol's Prince silkscreens not transformative given commercial context and licensing market impact. Signals a recalibration of fair use analysis.</p></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- COMPARATIVE -->
+<section id="comparative">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">05 — Comparative Perspective</span>
+      <h2 class="section-title">Jurisdictional Comparison</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="comp-grid reveal">
+      <div class="comp-card">
+        <span class="comp-flag">🇺🇸</span><span class="comp-country">United States</span>
+        <div class="comp-heading">Fair Use Doctrine</div>
+        <p class="comp-body">A flexible, multi-factor doctrine allowing courts to evaluate each case based on context, focusing on transformation and market impact. This flexibility enables adaptation to new forms of creativity and technological innovation.</p>
+        <div class="comp-verdict">Most flexible — highest judicial discretion</div>
+      </div>
+      <div class="comp-card">
+        <span class="comp-flag">🇮🇳</span><span class="comp-country">India</span>
+        <div class="comp-heading">Fair Dealing (§52, CA 1957)</div>
+        <p class="comp-body">A closed-list fair dealing system providing certainty but limiting courts from accommodating emerging creative practices. Absence of transformative use doctrine and strict commercial intent rules create a restrictive environment.</p>
+        <div class="comp-verdict">Most restrictive — limited to listed purposes</div>
+      </div>
+      <div class="comp-card">
+        <span class="comp-flag">🇬🇧</span><span class="comp-country">United Kingdom</span>
+        <div class="comp-heading">Narrow Fair Dealing</div>
+        <p class="comp-body">A similarly narrow approach but recognises certain exceptions such as parody. Provides marginally greater flexibility than India, though the framework remains significantly more limited than the American fair use approach.</p>
+        <div class="comp-verdict">Restrictive — with limited parody exception</div>
+      </div>
+      <div class="comp-card">
+        <span class="comp-flag">🇪🇺</span><span class="comp-country">European Union</span>
+        <div class="comp-heading">Hybrid Model</div>
+        <p class="comp-body">Combines harmonized statutory exceptions across member states with evolving judicial interpretation. The Digital Single Market Directive reflects an attempt to modernize exceptions for the online environment.</p>
+        <div class="comp-verdict">Balanced — statutory with evolving interpretation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTEMPORARY ISSUES -->
+<section id="contemporary">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">06 — Contemporary Issues</span>
+      <h2 class="section-title">Emerging Tensions in the Digital Age</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="issues-accordion reveal">
+      <div class="issue-item open">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Algorithmic Creativity and AI Training</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>Generative AI systems are trained on large datasets that often include copyrighted works. This raises questions about whether such use constitutes infringement or falls within permissible exceptions. The lack of transparency in AI systems complicates this issue further.</p>
+          <p>This development challenges the foundational premise of copyright law as an incentive mechanism. If creativity can be generated through automated systems drawing on existing works, the traditional link between authorship and protection becomes increasingly attenuated.</p>
+        </div></div>
+      </div>
+      <div class="issue-item">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Deepfakes and Synthetic Media</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>Technological advancements have enabled the replication of voice, likeness, and artistic style. While copyright law does not traditionally protect style, these developments challenge existing legal boundaries.</p>
+          <p>A critical issue is whether stylistic imitation — distinct from direct copying — should attract copyright protection. Increasing sophistication of synthetic media challenges the idea–expression dichotomy in unprecedented ways.</p>
+        </div></div>
+      </div>
+      <div class="issue-item">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Streaming Culture and Fragmented Use</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>Short-form content such as clips and reels involves partial reproduction of works. This complicates the application of the substantial similarity standard, as even brief excerpts may carry significant expressive value.</p>
+          <p>It raises whether copyright law should differentiate between enduring and ephemeral uses in digital environments where content is rapidly circulated and consumed across platforms.</p>
+        </div></div>
+      </div>
+      <div class="issue-item">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Platform-Based Enforcement</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>Digital platforms increasingly enforce copyright through automated systems. These systems often operate without nuanced legal analysis, leading to over-enforcement and shifting adjudicatory power away from courts.</p>
+          <p>This reflects a structural shift wherein private platforms increasingly assume the role of adjudicating copyright disputes, displacing traditional judicial processes in favour of algorithmic governance.</p>
+        </div></div>
+      </div>
+      <div class="issue-item">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Cultural Appropriation</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>The global circulation of content has intensified concerns about the use of cultural expressions without attribution. Copyright law, focused on individual authorship, struggles to address such collective concerns and the commodification of cultural heritage.</p>
+          <p>Existing frameworks are designed to protect individual creativity, not collective cultural traditions held by communities or indigenous peoples — a structural limitation that requires legislative attention.</p>
+        </div></div>
+      </div>
+      <div class="issue-item">
+        <button class="issue-toggle" onclick="this.parentElement.classList.toggle('open')">
+          <span class="issue-title">Open Licensing Models</span>
+          <span class="issue-icon">+</span>
+        </button>
+        <div class="issue-body"><div class="issue-body-inner">
+          <p>Creative Commons and similar frameworks enable collaborative creativity but do not fully resolve tensions between ownership and accessibility. Their effectiveness depends on awareness, accessibility, and consistent application.</p>
+          <p>While offering a partial solution to the rigidity of copyright law, open licensing exists in a complementary rather than adversarial relationship with traditional copyright, representing a pragmatic path for creators seeking wider reach.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYSIS -->
+<section id="analysis">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">07 — Analysis</span>
+      <h2 class="section-title">Critical Legal Analysis</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="analysis-pull reveal">"Copyright law operates within a fundamental tension between protection and innovation — excessive protection restricts creative experimentation, while insufficient protection undermines the rights and incentives of creators."</div>
+    <div class="analysis-cols reveal">
+      <div>
+        <p>In the Indian context, the emphasis on strict enforcement and the absence of a transformative use doctrine create a legal environment that prioritises control over flexibility. While this protects copyright holders, it limits the scope for remix-based creativity and may discourage experimentation.</p>
+        <p>The doctrine of transformative use, as developed in the United States, attempts to balance these competing interests. However, its application remains subjective and context-dependent, introducing unpredictability into copyright adjudication.</p>
+      </div>
+      <div>
+        <p>A sustainable copyright framework must recognise transformation as a legitimate form of creativity while ensuring that original works are not exploited without authorization. The 2023 Warhol decision signals a potential course correction — pulling back from expansive transformation and re-emphasising market harm.</p>
+        <p>Whether this recalibration adequately serves contemporary creative culture — particularly as AI, platform governance, and global content flows reshape artistic practice — remains an open and deeply contested question.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREATOR GUIDE -->
+<section id="guide">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">08 — Creator Guide</span>
+      <h2 class="section-title">Practical Guidance for Creators</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="guide-grid reveal">
+      <div class="guide-card"><span class="guide-icon">✓</span><div class="guide-title">Permissible Engagement</div><p class="guide-body">Use of copyrighted material is generally allowed for criticism, review, and parody, provided it does not involve substantial reproduction. Ensure your use falls within statutory exceptions applicable in your jurisdiction.</p></div>
+      <div class="guide-card"><span class="guide-icon">⚠</span><div class="guide-title">Legal Risks</div><p class="guide-body">Commercial use of existing material without authorization carries significant legal risk. Avoid using recognizable portions of a work in a manner that substitutes the original or competes with it in the same market.</p></div>
+      <div class="guide-card"><span class="guide-icon">✦</span><div class="guide-title">Best Practices</div><p class="guide-body">Where reliance on existing material is substantial, obtaining licences is the most reliable course of action. Attribution, while not always legally sufficient, remains an important ethical practice.</p></div>
+      <div class="guide-card"><span class="guide-icon">⬡</span><div class="guide-title">Ethical Considerations</div><p class="guide-body">Respect cultural contexts and avoid exploitative appropriation of indigenous or community-held creative traditions. Legal permissibility does not always equate to ethical legitimacy — both dimensions deserve consideration.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCLUSION -->
+<section id="conclusion">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">09 — Conclusion</span>
+      <h2 class="section-title">The Road Ahead</h2>
+      <div class="section-rule"></div>
+    </div>
+    <p class="concl-text reveal">Copyright law was designed for a context in which creative works were produced independently and reproduced in identifiable forms. Contemporary creativity, however, is increasingly collaborative, iterative, and technologically mediated.</p>
+    <div class="concl-pull reveal">"The distinction between originality and derivation has become less clear, requiring a more nuanced legal approach. A rigid framework risks inhibiting innovation, while an overly permissive system risks undermining the rights of creators."</div>
+    <p class="concl-text reveal">The future of copyright law lies in its ability to adapt to changing creative practices while maintaining its foundational objective of promoting creativity. This demands renewed engagement between legislators, courts, creators, and technologists — to forge a framework that is both principled and responsive.</p>
+  </div>
+</section>
+
+<!-- REFERENCES -->
+<section id="references">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-label">10 — References</span>
+      <h2 class="section-title">Sources &amp; Further Reading</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="refs-grid reveal">
+      <div>
+        <div class="refs-group-title">Statutes &amp; Treaties</div>
+        <ul class="refs-list">
+          <li>Copyright Act, 1957 <em>(India)</em></li>
+          <li>Berne Convention <em>1886</em></li>
+          <li>TRIPS Agreement <em>1995</em></li>
+          <li>WIPO Copyright Treaty <em>1996</em></li>
+        </ul>
+        <div class="refs-group-title" style="margin-top:1.5rem">Reports</div>
+        <ul class="refs-list">
+          <li>WIPO — Copyright in the Digital Environment</li>
+          <li>European Commission — Digital Single Market Report</li>
+        </ul>
+      </div>
+      <div>
+        <div class="refs-group-title">Indian Cases</div>
+        <ul class="refs-list">
+          <li>R.G. Anand v. Deluxe Films <em>1978</em></li>
+          <li>Gramophone Co. v. Super Cassette Industries <em>2010</em></li>
+          <li>Star India Pvt. Ltd. v. Leo Burnett (India) Pvt. Ltd.</li>
+          <li>Civic Chandran v. Ammini Amma</li>
+          <li>Sholay Copyright Case</li>
+        </ul>
+      </div>
+      <div>
+        <div class="refs-group-title">International Cases</div>
+        <ul class="refs-list">
+          <li>Campbell v. Acuff-Rose Music <em>510 U.S. 569 (1994)</em></li>
+          <li>Rogers v. Koons <em>960 F.2d 301 (1992)</em></li>
+          <li>Cariou v. Prince <em>714 F.3d 694 (2013)</em></li>
+          <li>Feist Publications v. Rural Tel. Service <em>499 U.S. 340 (1991)</em></li>
+          <li>Bridgeport Music v. Dimension Films <em>410 F.3d 792 (2005)</em></li>
+          <li>Authors Guild v. Google <em>804 F.3d 202 (2015)</em></li>
+          <li>Andy Warhol Foundation v. Goldsmith <em>598 U.S. (2023)</em></li>
+        </ul>
+      </div>
+      <div>
+        <div class="refs-group-title">Books &amp; Articles</div>
+        <ul class="refs-list">
+          <li>Lawrence Lessig — <em>Remix</em></li>
+          <li>James Boyle — <em>The Public Domain</em></li>
+          <li>Pamela Samuelson — <em>"Unbundling Fair Uses"</em></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Originality in the Remix Era · <span>Copyright Law &amp; Innovation</span> · 2024 Research Project</p>
+</footer>
+
+<script>
+// SCROLL PROGRESS
+window.addEventListener('scroll', function() {
+  var pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+}, { passive: true });
+
+// ACTIVE NAV
+var secs = document.querySelectorAll('section[id]');
+var navAs = document.querySelectorAll('.nav-links a');
+var io = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      navAs.forEach(function(a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id);
+      });
+    }
+  });
+}, { threshold: 0.25 });
+secs.forEach(function(s) { io.observe(s); });
+
+// REVEAL
+var ro = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e, i) {
+    if (e.isIntersecting) {
+      setTimeout(function() { e.target.classList.add('visible'); }, i * 60);
+      ro.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(function(r) { ro.observe(r); });
+
+// HAMBURGER
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('mobileMenu');
+  var h = document.getElementById('hamburger');
+  if (m.classList.contains('open') && !m.contains(e.target) && !h.contains(e.target)) closeMenu();
+});
+
+// CASE TABS
+function switchTab(id, btn) {
+  document.querySelectorAll('.cases-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.cases-panel').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// CASE ITEM CLICK (desktop)
+document.querySelectorAll('.cases-list').forEach(function(list) {
+  list.addEventListener('click', function(e) {
+    var item = e.target.closest('.case-item');
+    if (!item) return;
+    var target = item.dataset.target;
+    var panel = list.closest('.cases-list-layout');
+    panel.querySelectorAll('.case-item').forEach(function(i) { i.classList.remove('active'); });
+    panel.querySelectorAll('.case-detail-inner').forEach(function(d) { d.classList.remove('active'); });
+    item.classList.add('active');
+    panel.querySelector('#' + target).classList.add('active');
+  });
+});
+
+// MOBILE CASE ACCORDION
+function mAcc(btn) { btn.parentElement.classList.toggle('open'); }
+</script>
+</body>
+</html>
